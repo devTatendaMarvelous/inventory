@@ -13,17 +13,21 @@ return new class extends Migration
     {
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->references('id')->on('products');
-            $table->foreignId('warehouse_id')->references('id')->on('ware_houses');
-            $table->enum('movement_type', ['IN', 'OUT','TRANSFER'])->default('IN');
-            $table->float('quantity')->default(1.0);
-            $table->float('price');
-            $table->enum('status', ['APPROVED','REJECTED', 'PENDING'])->default('PENDING');
-            $table->foreignId('initiated_by')->references('id')->on('users');
-            $table->foreignId('validated_by')->references('id')->on('users');
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('warehouse_id')->nullable()->constrained('ware_houses')->nullOnDelete();
+            $table->foreignId('source_id')->nullable()->constrained('ware_houses')->nullOnDelete();
+            $table->enum('movement_type', ['IN', 'OUT', 'TRANSFER']);
+            $table->decimal('quantity_in', 15, 2)->default(0.00);
+            $table->decimal('quantity_Out', 15, 2)->default(0.00);
+            $table->decimal('unit_price', 15, 2)->nullable();
+            $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED'])->default('PENDING');
+            $table->mediumText('notes')->nullable();
+            $table->foreignId('initiated_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('validated_by')->nullable() ->constrained('users')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });
+
     }
 
 

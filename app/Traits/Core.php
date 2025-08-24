@@ -78,6 +78,13 @@ trait Core
             'Delete Warehouses',
             'Add Warehouses',
 
+            //Stocks Permissions
+            'Access Stocks',
+            'View Stocks',
+            'Edit Stocks',
+            'Delete Stocks',
+            'Add Stocks',
+
 
 
         ];

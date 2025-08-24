@@ -79,4 +79,13 @@ trait HasApiResponses
     }
 
 
+    function unprocessableContentResponseHandler($msg): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $msg,
+        ], 422);
+    }
+
+
 }
