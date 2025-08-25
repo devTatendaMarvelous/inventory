@@ -1,0 +1,52 @@
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Connect and Deploy
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p 22 "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" << 'EOF'
+          # Step 1: Navigate to the /opt directory
+          cd /home/procura/services
+
+          # Step 2: Clone the latest repository
+          if [ -d "procura" ]; then
+            echo "Directory already exists. Removing..."
+            rm -rf procura
+          fi
+          mkdir procura
+          # Step 3: Navigate to the project directory
+          cd procura
+          git clone https://devTatendaMarvelous:${{ secrets.TOKEN }}@github.com/procura-co/frontend .
+
+          git checkout develop
+          git pull origin develop
+          ufw allow 7100
+
+          # Step 4: Stop, remove, and clean Docker resources
+          docker stop  procura || true
+          docker rm  procura || true
+          docker rmi  procura || true
+
+          # Step 5: Build and run the Docker container
+          docker build -t  procura .
+          docker run -d -p 7100:8080 --name=procura --restart=always  procura
+
+          # Step 6: Clean up cloned repository
+          cd ..
+          rm -rf procura
+
+          echo "Deployment completed successfully."
+          EOF
