@@ -22,6 +22,18 @@ const menuItems = [
                 href: "/categories",
                 permission: "View Categories"
             },
+            {
+                icon: "/assets/images/teacher.png",
+                label: "Products",
+                href: "/products",
+                permission: "View Products"
+            },
+            {
+                icon: "/assets/images/teacher.png",
+                label: "Stocks",
+                href: "/stocks",
+                permission: "View Stocks"
+            },
 
         ],
     },

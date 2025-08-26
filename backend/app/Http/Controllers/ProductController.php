@@ -41,7 +41,12 @@ class ProductController extends Controller
             return  $this->createdResponseHandler('Product Added Successfully', new ProductResource($product));
         });
     }
-
+    public function show(Product $product)
+    {
+        return $this->checkPermission('View Products', function () use ($product) {
+            return $this->successResponseHandler('Product', new ProductResource($product));
+        });
+    }
 
     /**
      * Update the specified resource in storage.

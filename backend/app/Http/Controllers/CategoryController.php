@@ -44,7 +44,12 @@ class CategoryController extends Controller
         });
     }
 
-
+    public function show(Category $category)
+    {
+        return $this->checkPermission('View Categories', function () use ($category) {
+            return $this->successResponseHandler('Category', new CategoryResource($category));
+        });
+    }
     /**
      * Update the specified resource in storage.
      */

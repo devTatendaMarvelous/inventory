@@ -44,7 +44,13 @@ class StockMovementController extends Controller
             return  $this->createdResponseHandler('StockMovement Added Successfully', new StockMovementResource($stockMovement));
         });
     }
-
+    public function show(StockMovement $stockMovement)
+    {
+        return $this->checkPermission('View Stocks', function () use ($stockMovement) {
+            $stockMovement->load('product', 'warehouse', 'source');
+            return $this->successResponseHandler('StockMovement', new StockMovementResource($stockMovement));
+        });
+    }
 
     /**
      * Update the specified resource in storage.
