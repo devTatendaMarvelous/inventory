@@ -24,7 +24,6 @@ const useAxiosErrorInterceptor = () => {
                 return Promise.reject(error); // Reject the error to propagate it
             }
         );
-
         // Cleanup the interceptor when the component is unmounted
         return () => {
             axiosInstance.interceptors.response.eject(interceptor);

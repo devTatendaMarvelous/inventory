@@ -23,6 +23,7 @@ class StockMovementController extends Controller
         return $this->checkPermission('View Stocks', function () {
             try {
                 $stocks =StockMovement::with('product','warehouse','source')->get();
+               
                 return $this->successResponseHandler('Stocks', StockMovementResource::collection($stocks));
             } catch (\Exception $exception) {
                 return $this->errorResponseHandler($this->errorOccurredMessage());
@@ -40,17 +41,47 @@ class StockMovementController extends Controller
             if ($validated instanceof \Illuminate\Http\JsonResponse) {
                 return $validated;
             }
+            $validated['initiated_by'] = auth()->id();
             $stockMovement = StockMovement::create($validated);
             return  $this->createdResponseHandler('StockMovement Added Successfully', new StockMovementResource($stockMovement));
         });
     }
-    public function show(StockMovement $stockMovement)
-    {
-        return $this->checkPermission('View Stocks', function () use ($stockMovement) {
-            $stockMovement->load('product', 'warehouse', 'source');
-            return $this->successResponseHandler('StockMovement', new StockMovementResource($stockMovement));
-        });
+public function show(StockMovement $stockMovement)
+{
+    return $this->checkPermission('View Stocks', function () use ($stockMovement) {
+
+        $stockMovement->load('product', 'warehouse', 'source');
+        return $stockMovement;
+        return $this->successResponseHandler('StockMovement', new StockMovementResource($stockMovement));
+    });
+}
+
+
+public function validation(Request $request, $id)
+{
+    $stockMovement = StockMovement::find($id);
+    if (!$stockMovement) {
+        return $this->notFoundResponseHandler('Stock Movement not found');
     }
+    return $this->checkPermission('Validate Stocks', function () use ($stockMovement, $request) {
+        if ($stockMovement->status !== 'PENDING') {
+            return $this->unprocessableContentResponseHandler('Stock Movement is already validated');
+        }
+        $validated = Validator::make($request->all(), [
+            'status' => 'required|in:APPROVED,REJECTED',
+            'notes' => 'nullable|string',
+        ]);
+        if ($validated->fails()) {
+            return $this->errorValidationResponseHandler('Validation failed', $validated->errors()->toArray());
+        }
+        $stockMovement->status = $request->status;
+        $stockMovement->notes = $request->notes ?? null;
+        $stockMovement->save();
+        return $this->successResponseHandler('StockMovement validated successfully', new StockMovementResource($stockMovement));
+    });
+}
+
+
 
     /**
      * Update the specified resource in storage.
@@ -65,21 +96,15 @@ class StockMovementController extends Controller
             if ($validated instanceof \Illuminate\Http\JsonResponse) {
                 return $validated;
             }
-            if($stockMovement->status!='PENDING'){
-                return $this->unprocessableContentResponseHandler('Stock Movement is  already validated');
-            }elseif($request->status!='PENDING'){
-                $validated['validated_by']=auth()->id();
-            }
-
+           
             $stockMovement->product_id    = $validated['product_id'];
             $stockMovement->warehouse_id  = $validated['warehouse_id'];
             $stockMovement->movement_type = $validated['movement_type'];
             $stockMovement->quantity_in      = $validated['quantity_in'];
+            $stockMovement->quantity_in      = $validated['quantity_in'];
+            $stockMovement->quantity_out      = $validated['quantity_out'];
             $stockMovement->unit_price         = $validated['unit_price'];
-            $stockMovement->status        = $validated['status'];
             $stockMovement->notes         = $validated['notes'] ?? null;
-            $stockMovement->initiated_by  = $validated['initiated_by'];
-            $stockMovement->validated_by  = $validated['validated_by'];
             $stockMovement->save();
             $stockMovement->load('product','warehouse','source');
 
@@ -113,7 +138,6 @@ class StockMovementController extends Controller
             'unit_price' => 'required||numeric',
             'status'=>'nullable|in:APPROVED,REJECTED',
             'notes'=>'nullable',
-            'initiated_by'=>'nullable|exists:users,id',
         ];
 
         $validator = Validator::make($request->all(), $rules);

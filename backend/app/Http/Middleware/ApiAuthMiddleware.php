@@ -23,7 +23,6 @@ class ApiAuthMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            dd('test');
             JWTAuth::parseToken()->authenticate();
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
             return $this->unauthorizedResponseHandler('Invalid Token');

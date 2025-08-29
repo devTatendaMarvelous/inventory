@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('source_id')->nullable()->constrained('ware_houses')->nullOnDelete();
             $table->enum('movement_type', ['IN', 'OUT', 'TRANSFER']);
             $table->decimal('quantity_in', 15, 2)->default(0.00);
-            $table->decimal('quantity_Out', 15, 2)->default(0.00);
+            $table->decimal('quantity_out', 15, 2)->default(0.00);
             $table->decimal('unit_price', 15, 2)->nullable();
             $table->enum('status', ['PENDING', 'APPROVED', 'REJECTED'])->default('PENDING');
             $table->mediumText('notes')->nullable();

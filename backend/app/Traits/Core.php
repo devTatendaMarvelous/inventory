@@ -84,6 +84,7 @@ trait Core
             'Edit Stocks',
             'Delete Stocks',
             'Add Stocks',
+            'Validate Stocks',
 
 
 

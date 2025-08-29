@@ -1,4 +1,4 @@
-import { del, get } from "../../api/appService.js";
+import { del, get, post } from "../../api/appService.js";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAxiosErrorInterceptor from "../../api/ErrorInterceptor.jsx";
@@ -6,21 +6,25 @@ import useAxiosErrorInterceptor from "../../api/ErrorInterceptor.jsx";
 const Stock = () => {
     const [movements, setMovements] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [modalNotes, setModalNotes] = useState("");
+    const [selectedId, setSelectedId] = useState(null);
     const navigate = useNavigate();
     useAxiosErrorInterceptor();
-
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const data = await get("/stocks");
+            console.log(data);
+            setMovements(data);
+        } catch (error) {
+            console.error("Data fetching failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const data = await get("/stocks");
-                setMovements(data);
-            } catch (error) {
-                console.error("Data fetching failed:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+
         fetchData();
     }, []);
 
@@ -38,6 +42,35 @@ const Stock = () => {
             if (response.success) {
                 // Optionally refresh list or show message
             }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const onApprove = async (id) => {
+        try {
+            await post(`/stocks/${id}/validation`, { status: "APPROVED" });
+            // Optionally refresh list or show message
+            fetchData();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const onReject = (id) => {
+        setSelectedId(id);
+        setShowModal(true);
+
+    };
+
+    const handleModalSubmit = async () => {
+        try {
+            await post(`/stocks/${selectedId}/validation`, { status: "REJECTED", notes: modalNotes });
+            setShowModal(false);
+            setModalNotes("");
+            setSelectedId(null);
+            // Optionally refresh list or show message
+            fetchData();
         } catch (error) {
             console.error(error);
         }
@@ -85,11 +118,13 @@ const Stock = () => {
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.warehouse?.name}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.movement_type}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.quantity_in}</td>
-                            <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.quantity_Out}</td>
+                            <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.quantity_out}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.unit_price}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.status}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.notes}</td>
                             <td className="px-6 py-4 border-b flex gap-2">
+                                {m.status === "PENDING" && (
+                                    <>
                                 <button
                                     className="bg-blue-500 text-white px-3 py-1 rounded-md text-xs hover:bg-blue-700"
                                     onClick={() => onEdit(m)}
@@ -102,11 +137,57 @@ const Stock = () => {
                                 >
                                     Delete
                                 </button>
+                                <button
+                                    className="bg-green-600 text-white px-3 py-1 rounded-md text-xs hover:bg-green-800"
+                                    onClick={() => onApprove(m.id)}
+                                >
+                                    Approve
+                                </button>
+                                <button
+                                    className="bg-yellow-600 text-white px-3 py-1 rounded-md text-xs hover:bg-yellow-800"
+                                    onClick={() => onReject(m.id)}
+                                >
+                                    Reject
+                                </button>
+                                </>
+                            )
+                                }
                             </td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
+            )}
+
+            {showModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                    <div className="bg-white p-6 rounded shadow-lg w-96">
+                        <h2 className="text-lg font-semibold mb-4">Reject Movement</h2>
+                        <label className="block mb-2 text-sm font-medium text-gray-700">Notes</label>
+                        <textarea
+                            className="w-full border rounded-md p-2 mb-4"
+                            rows={3}
+                            value={modalNotes}
+                            onChange={e => setModalNotes(e.target.value)}
+                            required
+                        />
+                        <div className="flex justify-end gap-2">
+                            <button
+                                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-600"
+                                onClick={() => { setShowModal(false); setModalNotes(""); setSelectedId(null); }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-800"
+                                onClick={handleModalSubmit}
+                                disabled={!modalNotes.trim()}
+                            >
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

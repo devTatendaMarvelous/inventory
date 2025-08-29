@@ -19,4 +19,3 @@ Route::get('/', function () {
 });
 
 
-//docker run -d -p 7000:8080 --name=procura-auth --restart=always procura-auth

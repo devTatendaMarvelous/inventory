@@ -18,12 +18,12 @@ Route::prefix('v1')->group(function () {
         Route::post('/logout', 'logout');
     });
 
-//    Route::middleware('auth:api')->group(function () {
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
-    Route::resource('warehouses', WareHouseController::class);
-    Route::resource('stocks', StockMovementController::class);
-//    });
-
+    Route::middleware('auth.api')->group(function () {
+        Route::resource('categories', CategoryController::class);
+        Route::resource('products', ProductController::class);
+        Route::resource('warehouses', WareHouseController::class);
+        Route::resource('stocks', StockMovementController::class);
+        Route::post('stocks/{id}/validation',[StockMovementController::class,'validation']);
+    });
 
 });
