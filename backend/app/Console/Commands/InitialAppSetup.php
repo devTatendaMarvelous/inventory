@@ -10,6 +10,7 @@ use Spatie\Permission\Models\Role;
 class InitialAppSetup extends Command
 {
     use Core;
+
     /**
      * The name and signature of the console command.
      *
@@ -34,17 +35,21 @@ class InitialAppSetup extends Command
         $this->call('storage:link');
         $this->info('Bringing application down for maintenance...');
         $this->call('down');
-        $this->call('migrate',[
+        $this->call('migrate', [
             '--seed' => true,
         ]);
 
         $permissions = $this->systemPermissions();
-            $roles = [
+        $roles = [
             [
                 'name' => 'Super Admin',
                 'permissions' => [
                     $permissions
                 ]
+            ],
+            [
+                'name' => 'Stock Manager',
+                'permissions' => []
             ]
         ];
 

@@ -23,13 +23,14 @@ class StockMovementController extends Controller
         return $this->checkPermission('View Stocks', function () {
             try {
                 $stocks =StockMovement::with('product','warehouse','source')->get();
-               
+
                 return $this->successResponseHandler('Stocks', StockMovementResource::collection($stocks));
             } catch (\Exception $exception) {
                 return $this->errorResponseHandler($this->errorOccurredMessage());
             }
         });
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -51,7 +52,6 @@ public function show(StockMovement $stockMovement)
     return $this->checkPermission('View Stocks', function () use ($stockMovement) {
 
         $stockMovement->load('product', 'warehouse', 'source');
-        return $stockMovement;
         return $this->successResponseHandler('StockMovement', new StockMovementResource($stockMovement));
     });
 }
@@ -96,7 +96,7 @@ public function validation(Request $request, $id)
             if ($validated instanceof \Illuminate\Http\JsonResponse) {
                 return $validated;
             }
-           
+
             $stockMovement->product_id    = $validated['product_id'];
             $stockMovement->warehouse_id  = $validated['warehouse_id'];
             $stockMovement->movement_type = $validated['movement_type'];

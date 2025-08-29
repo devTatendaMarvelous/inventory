@@ -4,14 +4,17 @@ namespace App\Traits;
 
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Gate;
-
+use Illuminate\Support\Facades\Cache;
 trait Core
 {
+
+    protected $ttl = 86400; // 24 hours in seconds
+
     public function respondWithToken($token): \Illuminate\Http\JsonResponse
     {
         return response()->json([
             'access_token' => $token,
-            'user' => new UserResource( auth()->user()),
+            'user' => new UserResource(auth()->user()),
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
             'roles' => auth()->user()->roles()->pluck('name'),
@@ -20,14 +23,46 @@ trait Core
         ]);
     }
 
+//    redis start
+
+    public function lockProduct($warehouseId, $productId)
+    {
+        $key = $this->getKey($warehouseId, $productId);
+
+        return Cache::store('redis')->put($key, true, $this->ttl);
+    }
+
+    public function isLocked($warehouseId, $productId)
+    {
+        $key = $this->getKey($warehouseId, $productId);
+
+        return Cache::store('redis')->has($key);
+    }
+
+    public function releaseLock($warehouseId, $productId)
+    {
+        $key = $this->getKey($warehouseId, $productId);
+
+        return Cache::store('redis')->forget($key);
+    }
+
+    protected function getKey($warehouseId, $productId)
+    {
+        return "lock:warehouse:{$warehouseId}:product:{$productId}";
+    }
+
+//    Redis end
+
     public function errorOccurredMessage(): string
     {
         return 'An error occurred while processing your request. Please try again later.';
     }
+
     public function notAllowedMessage(): string
     {
         return 'You are not allowed to access this page';
     }
+
     /**
      * Check user permission and execute callback if authorized.
      */
@@ -41,10 +76,10 @@ trait Core
         try {
             return $callback();
         } catch (\Exception $exception) {
-            dd($exception->getMessage());
             return $this->errorResponseHandler($this->errorOccurredMessage());
         }
     }
+
     public function systemPermissions(): array
     {
         return [
@@ -85,7 +120,6 @@ trait Core
             'Delete Stocks',
             'Add Stocks',
             'Validate Stocks',
-
 
 
         ];

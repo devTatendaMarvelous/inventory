@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Role;
+use App\Models\StockReport;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +30,6 @@ class General extends Command
      */
     public function handle()
     {
-   dd(Hash::make('password'));
+   dd(StockReport::all());
     }
 }

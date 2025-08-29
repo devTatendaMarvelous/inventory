@@ -250,6 +250,10 @@
       <path value="$PROJECT_DIR$/backend/vendor/symfony/process" />
       <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-intl-normalizer" />
       <path value="$PROJECT_DIR$/backend/vendor/symfony/http-kernel" />
+      <path value="$PROJECT_DIR$/backend/vendor/mongodb/mongodb" />
+      <path value="$PROJECT_DIR$/backend/vendor/mongodb/laravel-mongodb" />
+      <path value="$PROJECT_DIR$/backend/vendor/symfony/polyfill-php85" />
+      <path value="$PROJECT_DIR$/backend/vendor/predis/predis" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />

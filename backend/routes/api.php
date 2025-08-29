@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\WareHouseController;
 use Illuminate\Http\Request;
@@ -23,7 +24,9 @@ Route::prefix('v1')->group(function () {
         Route::resource('products', ProductController::class);
         Route::resource('warehouses', WareHouseController::class);
         Route::resource('stocks', StockMovementController::class);
+        Route::resource('reports', ReportsController::class);
         Route::post('stocks/{id}/validation',[StockMovementController::class,'validation']);
+
     });
 
 });

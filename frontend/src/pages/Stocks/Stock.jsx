@@ -115,7 +115,7 @@ const Stock = () => {
                     {movements.map((m) => (
                         <tr key={m.id} className="hover:bg-gray-100">
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.product?.name}</td>
-                            <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.warehouse?.name}</td>
+                            <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.warehouse}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.movement_type}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.quantity_in}</td>
                             <td className="px-6 py-4 text-sm text-gray-700 border-b">{m.quantity_out}</td>
